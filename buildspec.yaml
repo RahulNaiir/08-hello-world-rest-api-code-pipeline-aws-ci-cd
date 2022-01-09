@@ -14,18 +14,19 @@ phases:
     - IMAGE_TAG=${COMMIT_HASH:=latest}
   build:
     commands:
-      - echo Build started on `date`
-      - echo Building the Docker image...
-      - docker build -t $REPOSITORY_URI:latest .
-      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+    - echo Build started on `date`
+    - echo $IMAGE_URI
+    - mvn clean package -Ddockerfile.skip
+    - docker build --tag $IMAGE_URI .
   post_build:
     commands:
-      - echo Build completed on `date`
-      - echo Pushing the Docker images...
-      - docker push $REPOSITORY_URI:latest
-      - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - echo Writing image definitions file...
-      - printf '[{"name":"hello-world","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+    - printenv
+    - echo Build completed on `date`
+    - echo $(docker images)
+    - echo Pushing docker image
+    - docker push $IMAGE_URI
+    - echo push completed
+    - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $IMAGE_URI > imagedefinitions.json
 artifacts:
   files:
   - imagedefinitions.json
